@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary_dark">#0D47A1</color>
+    <color name="primary">#1565C0</color>
+    <color name="accent">#E57373</color>
+    <color name="text_color_primary">#757575</color>
+    <color name="window_background">#F5F5F5</color>
+    <color name="navigation_bar">#E57373</color>
+    <color name="button_color">#FFFFFFFF</color>
+    <color name="dark_green">#339999</color>
+    <color name="light_green">#99CC66</color>
+    <color name="gray">#CCCCCC</color>
+
+</resources>

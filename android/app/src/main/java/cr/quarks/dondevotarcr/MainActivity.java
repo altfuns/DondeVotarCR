@@ -1,6 +1,7 @@
 package cr.quarks.dondevotarcr;
 
 import android.app.Activity;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -10,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,10 +19,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.suigeneris.android.core.CoreApp;
 import com.suigeneris.android.core.bo.DataAccessObject;
+import com.suigeneris.android.core.data.DatabaseUtil;
 import com.suigeneris.android.core.util.LogIt;
 
 import java.io.IOException;
@@ -54,10 +60,7 @@ public class MainActivity extends AppCompatActivity
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
         createDatabase();
-        List<Junta> juntas = DataAccessObject.findAll(Junta.class);
-        if(juntas != null){
-            LogIt.d(this, "Juntas:" + juntas.size());
-        }
+        fillPadron();
     }
 
     @Override
@@ -72,12 +75,18 @@ public class MainActivity extends AppCompatActivity
     private void createDatabase(){
         try {
             if(!CoreApp.getHelper().checkDataBase()){
+                CoreApp.getHelper().createDataBase();
                 Util.copyDataBase(this, DBHelper.getDatabasePath(), DBHelper.getDataBaseName());
+                DatabaseUtil.reCreateTable(Person.class, CoreApp.getHelper().openDataBase());
             }
 
         }catch (IOException e){
             Log.e("DondeVotarCR", e.getMessage());
         }
+    }
+
+    private void fillPadron() {
+        new PadronProcessTask().execute("HECENTRAL.txt");
     }
 
     public void onSectionAttached(int number) {
@@ -87,9 +96,6 @@ public class MainActivity extends AppCompatActivity
                 break;
             case 2:
                 mTitle = getString(R.string.title_section2);
-                break;
-            case 3:
-                mTitle = getString(R.string.title_section3);
                 break;
         }
     }
@@ -140,6 +146,14 @@ public class MainActivity extends AppCompatActivity
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
 
+        private EditText editText;
+        private LinearLayout results;
+        private TextView textView;
+        private TextView textView2;
+        private TextView textView3;
+        private TextView textView4;
+        private TextView textView5;
+
         /**
          * Returns a new instance of this fragment for the given section
          * number.
@@ -159,6 +173,35 @@ public class MainActivity extends AppCompatActivity
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+            editText = (EditText) rootView.findViewById(R.id.editText);
+            results = (LinearLayout) rootView.findViewById(R.id.results);
+            textView = (TextView) rootView.findViewById(R.id.textView);
+            textView2 = (TextView) rootView.findViewById(R.id.textView2);
+            textView3 = (TextView) rootView.findViewById(R.id.textView3);
+            textView4 = (TextView) rootView.findViewById(R.id.textView4);
+            textView5 = (TextView) rootView.findViewById(R.id.textView5);
+
+            editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                @Override
+                public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                    Person person = Person.findByIdentification(editText.getText().toString());
+                    if(person != null) {
+                        Center center = Center.findByJunta(person.getJuntaId());
+                        textView.setText(person.toString());
+                        textView2.setText(String.valueOf(person.getJuntaId()));
+                        textView3.setText(center.getName());
+                        textView4.setText(center.getElectoralDistrict());
+                        textView5.setText(center.getCanton());
+                        results.setVisibility(View.VISIBLE);
+                    }else{
+                        Toast.makeText(PlaceholderFragment.this.getContext(), "No se encontró el elector. Puede que vote en otro centro de votación.", Toast.LENGTH_LONG).show();
+                    }
+
+                    editText.selectAll();
+
+                    return true;
+                }
+            });
             return rootView;
         }
 
@@ -168,6 +211,20 @@ public class MainActivity extends AppCompatActivity
             ((MainActivity) activity).onSectionAttached(
                     getArguments().getInt(ARG_SECTION_NUMBER));
         }
+    }
+
+    private class PadronProcessTask extends AsyncTask<String, Integer, Long>{
+
+        @Override
+        protected Long doInBackground(String... params) {
+            int count = Person.countItems(Person.class);
+            if(count <=0) {
+                Util.processFile(MainActivity.this, params[0]);
+            }
+            return null;
+        }
+
+
     }
 
 }
