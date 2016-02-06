@@ -47,7 +47,6 @@ public class MainActivity extends AppCompatActivity
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
         createDatabase();
-        //fillPadron();
     }
 
     @Override
@@ -63,7 +62,13 @@ public class MainActivity extends AppCompatActivity
             fragmentManager.beginTransaction()
                     .replace(R.id.container, DownloadFragment.newInstance(position + 1))
                     .commit();
+        }else if(position == 2){
+            // update the main content by replacing fragments
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, AboutFragment.newInstance(position + 1))
+                    .commit();
         }
+
     }
 
     private void createDatabase(){
@@ -87,6 +92,9 @@ public class MainActivity extends AppCompatActivity
             case 2:
                 mTitle = getString(R.string.title_section2);
                 break;
+            case 3:
+                mTitle = getString(R.string.title_section3);
+                break;
         }
     }
 
@@ -109,21 +117,6 @@ public class MainActivity extends AppCompatActivity
             return true;
         }
         return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
 }

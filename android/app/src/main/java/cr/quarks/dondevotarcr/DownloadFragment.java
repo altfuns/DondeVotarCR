@@ -168,7 +168,14 @@ public class DownloadFragment extends Fragment {
         @Override
         protected String doInBackground(String... sUrl) {
             String url = sUrl[0];
-            File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            Boolean isSDPresent = android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED);
+            File dir = context.getFilesDir();
+            if(isSDPresent){
+                dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            }else{
+                dir = context.getFilesDir();
+            }
+
             String filename = URLUtil.guessFileName(url, null, null);
             String path = dir.getPath() + "/";
             String result = null;
@@ -176,7 +183,7 @@ public class DownloadFragment extends Fragment {
                 result = downloadFile(url,path, filename);
                 if(result == null){
                     if(unpackZip(path, filename)){
-                        processFile(path, filename.split("\\.")[0]+ ".txt");
+                        result = processFile(path, filename.split("\\.")[0]+ ".txt");
                     }
                 }
             }catch (Exception e){

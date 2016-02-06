@@ -3,6 +3,7 @@
 
     <string name="title_section1">Donde Voto</string>
     <string name="title_section2">Descargar</string>
+    <string name="title_section3">Acerca de</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
