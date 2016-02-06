@@ -1,9 +1,10 @@
 package cr.quarks.dondevotarcr;
 
-import android.preference.PreferenceManager;
 import android.support.multidex.MultiDexApplication;
 
 import com.suigeneris.android.core.CoreApp;
+
+import cr.quarks.dondevotarcr.util.DBHelper;
 
 /**
  * Created by altfuns on 2/3/16.

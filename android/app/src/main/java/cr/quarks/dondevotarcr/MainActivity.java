@@ -1,36 +1,23 @@
 package cr.quarks.dondevotarcr;
 
-import android.app.Activity;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.suigeneris.android.core.CoreApp;
-import com.suigeneris.android.core.bo.DataAccessObject;
 import com.suigeneris.android.core.data.DatabaseUtil;
-import com.suigeneris.android.core.util.LogIt;
 
 import java.io.IOException;
-import java.util.List;
+
+import cr.quarks.dondevotarcr.model.Person;
+import cr.quarks.dondevotarcr.util.DBHelper;
+import cr.quarks.dondevotarcr.util.Util;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -60,16 +47,23 @@ public class MainActivity extends AppCompatActivity
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
         createDatabase();
-        fillPadron();
+        //fillPadron();
     }
 
     @Override
     public void onNavigationDrawerItemSelected(int position) {
-        // update the main content by replacing fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
-                .commit();
+        if(position == 0) {
+            // update the main content by replacing fragments
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, VoteFragment.newInstance(position + 1))
+                    .commit();
+        }else if(position == 1){
+            // update the main content by replacing fragments
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, DownloadFragment.newInstance(position + 1))
+                    .commit();
+        }
     }
 
     private void createDatabase(){
@@ -83,10 +77,6 @@ public class MainActivity extends AppCompatActivity
         }catch (IOException e){
             Log.e("DondeVotarCR", e.getMessage());
         }
-    }
-
-    private void fillPadron() {
-        new PadronProcessTask().execute("HECENTRAL.txt");
     }
 
     public void onSectionAttached(int number) {
@@ -134,97 +124,6 @@ public class MainActivity extends AppCompatActivity
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
-
-        private EditText editText;
-        private LinearLayout results;
-        private TextView textView;
-        private TextView textView2;
-        private TextView textView3;
-        private TextView textView4;
-        private TextView textView5;
-
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-        public PlaceholderFragment() {
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            editText = (EditText) rootView.findViewById(R.id.editText);
-            results = (LinearLayout) rootView.findViewById(R.id.results);
-            textView = (TextView) rootView.findViewById(R.id.textView);
-            textView2 = (TextView) rootView.findViewById(R.id.textView2);
-            textView3 = (TextView) rootView.findViewById(R.id.textView3);
-            textView4 = (TextView) rootView.findViewById(R.id.textView4);
-            textView5 = (TextView) rootView.findViewById(R.id.textView5);
-
-            editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-                @Override
-                public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                    Person person = Person.findByIdentification(editText.getText().toString());
-                    if(person != null) {
-                        Center center = Center.findByJunta(person.getJuntaId());
-                        textView.setText(person.toString());
-                        textView2.setText(String.valueOf(person.getJuntaId()));
-                        textView3.setText(center.getName());
-                        textView4.setText(center.getElectoralDistrict());
-                        textView5.setText(center.getCanton());
-                        results.setVisibility(View.VISIBLE);
-                    }else{
-                        Toast.makeText(PlaceholderFragment.this.getContext(), "No se encontró el elector. Puede que vote en otro centro de votación.", Toast.LENGTH_LONG).show();
-                    }
-
-                    editText.selectAll();
-
-                    return true;
-                }
-            });
-            return rootView;
-        }
-
-        @Override
-        public void onAttach(Activity activity) {
-            super.onAttach(activity);
-            ((MainActivity) activity).onSectionAttached(
-                    getArguments().getInt(ARG_SECTION_NUMBER));
-        }
-    }
-
-    private class PadronProcessTask extends AsyncTask<String, Integer, Long>{
-
-        @Override
-        protected Long doInBackground(String... params) {
-            int count = Person.countItems(Person.class);
-            if(count <=0) {
-                Util.processFile(MainActivity.this, params[0]);
-            }
-            return null;
-        }
-
-
     }
 
 }

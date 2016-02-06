@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">DondeVotarCR</string>
 
-    <string name="title_section1">Buscar</string>
+    <string name="title_section1">Donde Voto</string>
     <string name="title_section2">Descargar</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
